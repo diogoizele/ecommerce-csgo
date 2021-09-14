@@ -1,0 +1,28 @@
+{
+  "name": "ecommerce_csgo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diogoizele/ecommerce-csgo.git"
+  },
+  "keywords": [
+    "api",
+    "node",
+    "express",
+    "axios",
+    "postgresql",
+    "vue",
+    "bootstrap"
+  ],
+  "author": "Diogo Izele",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/diogoizele/ecommerce-csgo/issues"
+  },
+  "homepage": "https://github.com/diogoizele/ecommerce-csgo#readme"
+}
