@@ -1,0 +1,80 @@
+#auth {
+  width: 100vw;
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #3aaf83;
+}
+
+.authentication {
+  width: 40rem;
+  height: 50rem;
+  padding: 5rem;
+
+  background-color: white;
+  box-shadow: 1rem 1rem 1px #29996f;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.authentication h3 {
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #222;
+  flex: 2;
+}
+
+.authentication h5 {
+  color: #666;
+  flex: 1;
+}
+
+.authentication form {
+  flex: 10;
+}
+
+.authentication form div {
+  display: flex;
+  flex-direction: column;
+}
+
+.authentication form label {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.authentication form input {
+  padding: 0.7rem 1rem;
+  border: transparent;
+  background-color: #eee;
+  outline: none;
+  font-size: 2rem;
+}
+
+.authentication form button {
+  padding: 0.7rem 1rem;
+  border: transparent;
+  background-color: #3aaf83;
+  color: white;
+  font-size: 1.3rem;
+  font-weight: bolder;
+  text-transform: uppercase;
+
+  transition: 0.3s;
+}
+
+.authentication form button:hover {
+  background-color: #29996f;
+}
+
+.authentication form label.auth-invalid {
+  font-size: 1rem;
+  color: red;
+  text-transform: none;
+  opacity: .7;
+}
