@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
 
-  background-color: #3aaf83;
+  background-color: #195E93;
 }
 
 .authentication {
@@ -15,7 +15,7 @@
   padding: 5rem;
 
   background-color: white;
-  box-shadow: 1rem 1rem 1px #29996f;
+  box-shadow: 1rem 1rem 1px #0a4877;
 
   display: flex;
   flex-direction: column;
@@ -59,7 +59,7 @@
 .authentication form button {
   padding: 0.7rem 1rem;
   border: transparent;
-  background-color: #3aaf83;
+  background-color: #195E93;
   color: white;
   font-size: 1.3rem;
   font-weight: bolder;
@@ -69,12 +69,28 @@
 }
 
 .authentication form button:hover {
-  background-color: #29996f;
+  background-color: #0a4877;
 }
 
 .authentication form label.auth-invalid {
-  font-size: 1rem;
-  color: red;
+  font-size: 1.1rem;
+  color: rgb(155, 0, 0);
   text-transform: none;
   opacity: .7;
+}
+
+.form-loader {
+  animation: is-rotating 1s infinite;
+  border: 6px solid #d1d1d1;
+  border-radius: 50%;
+  border-top-color: #0a4877;
+  height: 50px;
+  width: 50px;
+  margin: 0 auto;
+}
+
+@keyframes is-rotating {
+  to {
+    transform: rotate(1turn);
+  }
 }

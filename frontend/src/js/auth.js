@@ -24,6 +24,7 @@ const auth = new Vue({
       );
 
       if (passwordValidation && nicknameValidation) {
+        this.loading = true;
         axios
           .get("http://localhost:4040/getPlayers")
           .then((response) => response.data)
@@ -36,6 +37,7 @@ const auth = new Vue({
           })
           .then((res) => {
             const [user] = res;
+
             if (user) {
               const checkPassword = this.user.password === user.password;
               if (checkPassword) {
@@ -43,7 +45,10 @@ const auth = new Vue({
                 this.logged = true;
                 localStorage.setItem(
                   "logged",
-                  JSON.stringify({ status: true })
+                  JSON.stringify({
+                    status: true,
+                    user: { nickname: this.user.nickname },
+                  })
                 );
               } else {
                 this.validation(
@@ -54,6 +59,7 @@ const auth = new Vue({
                   },
                   () => (this.user.passwordRequired = false)
                 );
+                this.loading = false;
               }
             } else {
               this.validation(
@@ -64,11 +70,12 @@ const auth = new Vue({
                 },
                 () => (this.user.nicknameRequired = false)
               );
+              this.loading = false;
             }
           });
       }
     },
-    
+
     validation(input, invalid, valid) {
       if (!input) {
         invalid();
@@ -79,5 +86,10 @@ const auth = new Vue({
       }
     },
   },
-  created() {},
+  created() {
+    if (!localStorage.hasOwnProperty("logged")) {
+      localStorage.setItem("logged", JSON.stringify({ status: false }));
+      console.log("oi");
+    }
+  },
 });
