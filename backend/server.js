@@ -5,7 +5,7 @@ const app = express();
 const port = 4040;
 const queryGetPlayers = "SELECT nickname, password FROM players";
 const queryGetWeapons =
-  "SELECT weapons.name, weapons.price, weapons.type_code, weapon_types.name AS type_name FROM weapons, weapon_types WHERE weapons.type_code = weapon_types.code ORDER BY weapon_types ASC";
+  "SELECT weapons.code, weapons.name, weapons.price, weapons.type_code, weapon_types.name AS type_name FROM weapons, weapon_types WHERE weapons.type_code = weapon_types.code ORDER BY weapon_types ASC";
 const queryGetPurchases = "SELECT * FROM purchases";
 const queryGetWeaponPurchase = "SELECT * FROM weapon_purchase";
 

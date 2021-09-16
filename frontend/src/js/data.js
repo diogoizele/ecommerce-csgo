@@ -15,9 +15,20 @@ let data = {
     passwordRequiredMessage: "",
     purchases: [],
     weaponPurchase: [],
-    cart: "",
   },
+  cart: [],
   weapons: [],
+  weaponLoading: true,
+  newWeaponPurchase: {
+    purchaseCode: "",
+    weaponCode: "",
+    quantity: "",
+    value: "",
+  },
+  newPurchase: {
+    value: "",
+    date: "",
+  },
 };
 
 function getLogged() {

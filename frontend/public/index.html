@@ -64,7 +64,11 @@
       <div id="app" v-if="logged">
         <header class="header">
           <div class="logo">
-            <img src="../src/img/logo.png" alt="Logo da Loja" />
+            <img
+              src="../src/img/logo.png"
+              alt="Logo da Loja"
+              draggable="false"
+            />
           </div>
           <nav>
             <ul>
@@ -89,7 +93,7 @@
                       d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45zM6.16 6h12.15l-2.76 5H8.53L6.16 6z"
                     />
                   </svg>
-                  {{user.cart}}
+                  {{cart.length}}
                 </button>
               </li>
               <li>
@@ -120,9 +124,106 @@
           </nav>
         </header>
         <main>
-          <section class="app-section" id="appStore" v-if="currentSection.store">loja</section>
-          <section class="app-section" id="appCart" v-if="currentSection.cart">carrinho</section>
-          <section class="app-section" id="appProfile" v-if="currentSection.profile">
+          <section
+            class="app-section"
+            id="appStore"
+            v-show="currentSection.store"
+          >
+            <section>
+              <h3>Armas</h3>
+              <div class="form-group" v-if="this.weaponLoading">
+                <div class="form-loader"></div>
+              </div>
+              <ul>
+                <li v-for="weapon in weapons" :id="weapon.code">
+                  <img
+                    v-bind:src="setImageSrc(weapon.type_name)"
+                    alt="Foto do Tipo da Arma"
+                  />
+                  <p class="weapon-name">{{weapon.name}}</p>
+                  <p class="weapon-type">{{weapon.type_name}}</p>
+
+                  <div>
+                    <p>${{weapon.price}}</p>
+                    <button @click="addToCart(weapon,  $event)">
+                      <span>Adicionar ao</span>
+                      <svg viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0V0z" fill="none" />
+                        <path
+                          d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-1.45-5c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7l1.1-2h7.45zM6.16 6h12.15l-2.76 5H8.53L6.16 6z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </li>
+              </ul>
+            </section>
+          </section>
+
+          <section
+            class="app-section"
+            id="appCart"
+            v-if="currentSection.cart"
+          >
+            <form>
+              <div class="form-group">
+                <label for="weaponPurchasePurchaseCode">Compra</label>
+                <select id="weaponPurchasePurchaseCode">
+                  <option value="">Nova Compra</option>
+                  <option
+                    v-for="purchase in user.purchases"
+                    :value="purchase.code"
+                  >
+                    {{purchase.code}}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="weaponPurchaseWeapon">Arma</label>
+                <select id="weaponPurchaseWeapon">
+                  <option value="">Escolha Uma opção</option>
+                  <option v-for="weapon in weapons" :value="weapon.code">
+                    {{weapon.name}}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="weaponPurchaseQuantity">Quantidade</label>
+                <input type="number" id="weaponPurchaseQuantity" />
+              </div>
+              <div class="form-group">
+                <label for="">Valor</label>
+                <input type="text" disabled />
+              </div>
+              <div class="form-group buttons">
+                <button>Gravar</button>
+                <button>Cancelar</button>
+              </div>
+            </form>
+            <table>
+              <thead>
+                <tr>
+                  <th>Arma</th>
+                  <th>Quantidade</th>
+                  <th>Valor</th>
+                  <th>Editar</th>
+                  <th>Remover</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in cart">
+                  <td>{{item.weaponCode}}</td>
+                  <td>{{item.quantity}}</td>
+                  <td>${{item.value}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+          <section
+            class="app-section"
+            id="appProfile"
+            v-if="currentSection.profile"
+          >
             perfil
           </section>
         </main>
