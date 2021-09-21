@@ -227,7 +227,10 @@ const container = new Vue({
         } else {
           // edita uma compra
           axios
-            .post("http://localhost:4040/updatePurchase", newPurchase)
+            .post("http://localhost:4040/updatePurchase", {
+              ...newPurchase,
+              code: data.newPurchase.code,
+            })
             .then((response) => {
               console.log(response);
               data.user.purchases.forEach((purchase, index) => {
@@ -274,6 +277,45 @@ const container = new Vue({
       data.newPurchase.date = oldDate;
       data.newPurchase.value = data.user.purchases[index].value;
       data.newPurchase.code = data.user.purchases[index].code;
+    },
+
+    removePurchaseButton(index, code) {
+      const label = document.getElementById("newPurchaseStatus");
+      const wannaRemove = confirm("Deseja mesmo remover?");
+      if (wannaRemove) {
+        data.validations.purchaseLoading = true;
+        axios
+          .get(`http://localhost:4040/deletePurchase/${code}`)
+          .then((response) => {
+            setTimeout(() => {
+              data.validations.purchaseLoading = false;
+              data.validations.purchaseMessage = "Compra excluída com sucesso.";
+              data.validations.purchaseStatus = true;
+              label.classList.add("successful");
+              label.classList.remove("invalid");
+
+              data.user.purchases.splice(index, 1);
+              this.resetNewPurchase();
+            }, 1000);
+
+            setTimeout(() => {
+              data.validations.purchaseStatus = false;
+            }, 4000);
+          })
+          .catch((error) => {
+            setTimeout(() => {
+              data.validations.purchaseLoading = false;
+              data.validations.purchaseMessage = "Erro ao excluir compra.";
+              data.validations.purchaseStatus = true;
+              label.classList.add("invalid");
+              label.classList.remove("successful");
+            }, 1000);
+
+            setTimeout(() => {
+              data.validations.purchaseStatus = false;
+            }, 4000);
+          });
+      }
     },
 
     resetNewPurchase(e) {

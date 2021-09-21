@@ -376,7 +376,9 @@
                       </button>
                     </td>
                     <td>
-                      <button>
+                      <button
+                        @click="removePurchaseButton(index, purchase.code)"
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           height="24px"

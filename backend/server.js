@@ -167,7 +167,30 @@ app.post("/updatePurchase", (req, res, next) => {
           console.log(err);
           res.status(400).send(JSON.stringify(err));
         } else {
-          console.log("Editou");
+          res.status(200).send(result);
+        }
+      });
+    }
+  });
+});
+
+app.get("/deletePurchase/:code", (req, res, next) => {
+  db.connect((err, client, done) => {
+    if (err) {
+      console.log("Não conseguiu acessar o Banco");
+      res.status(400).send(JSON.stringify(err));
+    } else {
+      const queryInsertPurchase = {
+        text: "DELETE FROM purchases WHERE code = $1",
+        values: [req.params.code],
+      };
+
+      client.query(queryInsertPurchase, (err, result) => {
+        done();
+        if (err) {
+          console.log(err);
+          res.status(400).send(JSON.stringify(err));
+        } else {
           res.status(200).send(result);
         }
       });
