@@ -9,18 +9,20 @@ const auth = new Vue({
       const passwordValidation = this.validation(
         data.user.password,
         () => {
-          data.user.passwordRequired = true;
-          data.user.passwordRequiredMessage = "O campo senha é necessário.";
+          data.validations.passwordRequired = true;
+          data.validations.passwordMessageInvalid =
+            "O campo senha é necessário.";
         },
-        () => (data.user.passwordRequired = false)
+        () => (data.validations.passwordRequired = false)
       );
       const nicknameValidation = this.validation(
         data.user.nickname,
         () => {
-          data.user.nicknameRequired = true;
-          data.user.nicknameRequiredMessage = "O campo nickname é necessário.";
+          data.validations.nicknameRequired = true;
+          data.validations.nicknameMessageInvalid =
+            "O campo nickname é necessário.";
         },
-        () => (data.user.nicknameRequired = false)
+        () => (data.validations.nicknameRequired = false)
       );
 
       if (passwordValidation && nicknameValidation) {
@@ -31,8 +33,7 @@ const auth = new Vue({
           .then((data) => {
             return data.filter(
               // filtra pra ver se existe esse nome de usuário
-              (user) =>
-                user.nickname.toLowerCase() === this.user.nickname.toLowerCase()
+              (user) => user.nickname === this.user.nickname
             );
           })
           .then((res) => {
@@ -50,14 +51,16 @@ const auth = new Vue({
                     user: { nickname: this.user.nickname },
                   })
                 );
+                this.getPurchases();
               } else {
                 this.validation(
                   checkPassword,
                   () => {
-                    this.user.passwordRequired = true;
-                    this.user.passwordRequiredMessage = "Senha incorreta.";
+                    data.validations.passwordRequired = true;
+                    data.validations.passwordMessageInvalid =
+                      "Senha incorreta.";
                   },
-                  () => (this.user.passwordRequired = false)
+                  () => (this.validations.passwordRequired = false)
                 );
                 this.loading = false;
               }
@@ -65,10 +68,10 @@ const auth = new Vue({
               this.validation(
                 user,
                 () => {
-                  this.user.nicknameRequired = true;
-                  this.user.nicknameRequiredMessage = "Jogador não cadastrado.";
+                  data.validations.nicknameRequired = true;
+                  data.validations.nicknameMessageInvalid = "Jogador não encontrado.";
                 },
-                () => (this.user.nicknameRequired = false)
+                () => (data.validations.nicknameRequired = false)
               );
               this.loading = false;
             }
@@ -85,11 +88,33 @@ const auth = new Vue({
         return true;
       }
     },
+
+    getPurchases() {
+      axios
+        .get("http://localhost:4040/getPurchases")
+        .then((response) => response.data)
+        .then((respData) => {
+          const purchases = [];
+          respData.forEach((element) => {
+            const playerNickname = element.player_nickname;
+            if (data.user.nickname === playerNickname) {
+              purchases.push(element);
+            }
+          });
+
+          if (purchases.length) {
+            data.user.purchases = purchases;
+          } else {
+            data.user.purchases = [];
+          }
+        });
+    },
   },
   created() {
     if (!localStorage.hasOwnProperty("logged")) {
       localStorage.setItem("logged", JSON.stringify({ status: false }));
-      console.log("oi");
     }
+
+    this.getPurchases();
   },
 });

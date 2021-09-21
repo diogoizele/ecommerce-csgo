@@ -5,9 +5,8 @@
 
 #app {
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - 9rem);
   background-color: #ebebf1;
-  overflow-y: hidden;
 }
 
 .header {
@@ -189,15 +188,15 @@ span {
   width: 2rem;
 }
 
-#appCart {
+.app-section {
   display: flex;
   justify-content: space-between;
   background-color: inherit;
 }
 
-#appCart form {
+.app-section form {
   height: 80%;
-
+  
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -206,9 +205,9 @@ span {
 }
 
 #app .form-group {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  width: 100%;
 }
 
 #app select,
@@ -232,13 +231,18 @@ span {
   padding: 1rem;
 }
 
-#appCart table {
-  flex: 2;
+#app .table-container {
   height: 80%;
+  flex: 2;
   width: 100%;
-  overflow: scroll;
+  overflow-y: scroll;
+}
+
+#app table {
+  width: 100%;
   border-collapse: collapse;
   font-size: 1.5rem;
+  text-align: center;
 }
 
 #app table tr:nth-child(odd) {
@@ -250,13 +254,35 @@ span {
 }
 
 #app table thead tr:nth-child(1) {
-  background-color: #1f1f1f;
-  color: white;
   width: 100%;
   font-size: 1.8rem;
+
+  border: transparent;
+  background-color: #1f1f1f;
+  color: white;
 }
 
-@media screen and (max-width: 800px) {
+#app th,
+#app td {
+  text-align: center;
+  height: 4rem;
+}
+
+#app td button {
+  border: transparent;
+  background-color: transparent;
+  color: #333;
+}
+
+#app td button svg {
+  transition: 0.3s;
+}
+
+#app td button:hover svg {
+  transform: scale(1.1);
+}
+
+@media screen and (max-width: 960px) {
   .header .logo {
     display: none;
   }
@@ -265,14 +291,19 @@ span {
   }
   #app {
     overflow-y: scroll;
+    height: 100%;
   }
 
-  #appCart {
+  .app-section {
     flex-direction: column;
     align-items: center;
   }
-  #appCart table {
+  .app-section table {
     margin-top: 5rem;
+  }
+
+  .app-section form {
+    width: 100%;
   }
 }
 
@@ -282,9 +313,7 @@ span {
     box-sizing: border-box;
     padding: 0.8rem 3rem;
   }
-}
 
-@media screen and (min-height: 670px) {
   .app-section section ul {
     height: 50rem;
   }

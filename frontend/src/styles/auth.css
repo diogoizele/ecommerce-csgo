@@ -72,12 +72,26 @@
   background-color: #0a4877;
 }
 
-.authentication form label.auth-invalid {
+.auth-invalid, .authentication label.auth-invalid, .invalid {
   font-size: 1.1rem;
-  color: rgb(155, 0, 0);
+  color: #9b0000;
   text-transform: none;
   opacity: .7;
 }
+
+.successful {
+  font-size: 1.1rem;
+  color: #009b41;
+  opacity: .7;
+}
+
+.invalid, .successful {
+  text-transform: uppercase;
+  text-align: center;
+}
+
+
+
 
 .form-loader {
   animation: is-rotating 1s infinite;
