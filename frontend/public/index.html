@@ -165,9 +165,16 @@
             <form>
               <div class="form-group">
                 <label for="weaponPurchasePurchaseCode">Compra</label>
+                <label
+                  class="auth-invalid"
+                  for="weaponPurchasePurchaseCode"
+                  v-if="validations.purchaseRequired"
+                >
+                  {{validations.purchaseRequiredMessage}} *
+                </label>
                 <select
                   id="weaponPurchasePurchaseCode"
-                  @change="renderWeaponPurchase(purchase.code)"
+                  @change="renderWeaponPurchase(newWeaponPurchase.purchaseCode)"
                   v-model="newWeaponPurchase.purchaseCode"
                 >
                   <option value="">Escolha uma opção</option>
@@ -184,9 +191,9 @@
                 <label
                   class="auth-invalid"
                   for="weaponPurchaseWeapon"
-                  v-if="newWeaponPurchase.weaponRequired"
+                  v-if="validations.weaponRequired"
                 >
-                  {{newWeaponPurchase.weaponRequiredMessage}} *
+                  {{validations.weaponRequiredMessage}} *
                 </label>
                 <select
                   id="weaponPurchaseWeapon"
@@ -204,9 +211,9 @@
                 <label
                   class="auth-invalid"
                   for="weaponPurchaseQuantity"
-                  v-if="newWeaponPurchase.quantityRequired"
+                  v-if="validations.quantityRequired"
                 >
-                  {{newWeaponPurchase.quantityRequiredMessage}} *
+                  {{validations.quantityRequiredMessage}} *
                 </label>
                 <input
                   min="1"
@@ -221,11 +228,19 @@
                 <input type="text" disabled v-model="newWeaponPurchase.value" />
               </div>
               <div class="form-group buttons">
-                <button @click="addToCart(null, $event)">Gravar</button>
-                <button type="reset">Cancelar</button>
+                <button type="button" @click="addToCart(null)">Gravar</button>
+                <button type="reset" @click="resetNewWeaponPurchase($event)">
+                  Cancelar
+                </button>
               </div>
-              <label class="auth-invalid" v-if="newWeaponPurchase.weaponExists">
-                {{newWeaponPurchase.weaponExistsMessage}} *
+              <div class="form-group" v-if="validations.weaponPurchaseLoading">
+                <div class="form-loader"></div>
+              </div>
+              <label
+                v-show="validations.weaponExists"
+                id="newWeaponPurchaseStatus"
+              >
+                {{validations.weaponExistsMessage}} *
               </label>
             </form>
             <div class="table-container">
@@ -240,8 +255,8 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="item in cart">
-                    <td>{{weaponName(item.weaponCode)}}</td>
+                  <tr v-for="(item, index) in cart">
+                    <td>{{weaponName(item.weaponcode)}}</td>
                     <td>{{item.quantity}}</td>
                     <td>${{item.value}}</td>
                     <td>
@@ -261,7 +276,7 @@
                       </button>
                     </td>
                     <td>
-                      <button @click="removeCartItem(item)">
+                      <button @click="removeWeaponPurchaseButton(index)">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           height="24px"
@@ -394,7 +409,7 @@
                       </button>
                     </td>
                     <td>
-                      <button>
+                      <button @click="goShop(purchase.code)">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           height="24px"

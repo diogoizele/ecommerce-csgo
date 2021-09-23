@@ -8,7 +8,8 @@ const queryGetWeapons =
   "SELECT weapons.code, weapons.name, weapons.price, weapons.type_code, weapon_types.name AS type_name FROM weapons, weapon_types WHERE weapons.type_code = weapon_types.code ORDER BY weapon_types ASC";
 const queryGetPurchases =
   "SELECT code, to_char(date, 'yyyy-mm-dd') as date, value, player_nickname FROM purchases ORDER BY date ASC";
-const queryGetWeaponPurchase = "SELECT * FROM weapon_purchase";
+const queryGetWeaponPurchase =
+  "SELECT purchase_code AS purchaseCode, weapon_code AS weaponCode, value, quantity FROM weapon_purchase";
 
 app.use(express.json());
 app.use(function (req, res, next) {
@@ -116,11 +117,24 @@ app.post("/insertWeaponPurchase", (req, res, next) => {
       console.log("Não conseguiu acessar o Banco");
       res.status(400).send(JSON.stringify(err));
     } else {
-      const queryInsertWeaponPurchase = `
-      INSERT INTO weapon_purchase (purchase_code, weapon_code, value, quantity)
-      values(${req.body.purchaseCode}, ${req.body.weaponCode},
-        ${req.body.value}, ${req.body.quantity});`;
-      client.query();
+      const queryInsertWeaponPurchase = {
+        text: "INSERT INTO weapon_purchase (purchase_code, weapon_code, value, quantity) values ($1,$2,$3,$4)",
+        values: [
+          req.body.purchaseCode,
+          req.body.weaponcode,
+          req.body.value,
+          req.body.quantity,
+        ],
+      };
+      client.query(queryInsertWeaponPurchase, (err, result) => {
+        done();
+        if (err) {
+          console.log(err);
+          res.status(400).send(JSON.stringify(err));
+        } else {
+          res.status(201).send(result);
+        }
+      });
     }
   });
 });
@@ -174,6 +188,31 @@ app.post("/updatePurchase", (req, res, next) => {
   });
 });
 
+app.post("/updatePurchasePrice", (req, res, next) => {
+  db.connect((err, client, done) => {
+    if (err) {
+      console.log("Não conseguiu acessar o Banco");
+      res.status(400).send(JSON.stringify(err));
+    } else {
+      const queryInsertPurchase = {
+        text: "UPDATE purchases SET value = $1 where code = $2",
+        values: [req.body.value, req.body.code],
+      };
+
+      client.query(queryInsertPurchase, (err, result) => {
+        done();
+        if (err) {
+          console.log(err);
+          res.status(400).send(JSON.stringify(err));
+        } else {
+          res.status(200).send(result);
+        }
+      });
+    }
+  });
+});
+
+
 app.get("/deletePurchase/:code", (req, res, next) => {
   db.connect((err, client, done) => {
     if (err) {
@@ -183,6 +222,30 @@ app.get("/deletePurchase/:code", (req, res, next) => {
       const queryInsertPurchase = {
         text: "DELETE FROM purchases WHERE code = $1",
         values: [req.params.code],
+      };
+
+      client.query(queryInsertPurchase, (err, result) => {
+        done();
+        if (err) {
+          console.log(err);
+          res.status(400).send(JSON.stringify(err));
+        } else {
+          res.status(200).send(result);
+        }
+      });
+    }
+  });
+});
+
+app.post("/deleteWeaponPurchase", (req, res, next) => {
+  db.connect((err, client, done) => {
+    if (err) {
+      console.log("Não conseguiu acessar o Banco");
+      res.status(400).send(JSON.stringify(err));
+    } else {
+      const queryInsertPurchase = {
+        text: "DELETE FROM weapon_purchase WHERE purchase_code = $1 AND weapon_code = $2",
+        values: [req.body.code, req.body.weapon],
       };
 
       client.query(queryInsertPurchase, (err, result) => {

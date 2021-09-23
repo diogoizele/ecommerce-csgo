@@ -53,105 +53,116 @@ const container = new Vue({
       return url;
     },
 
-    addToCart(weapon, e) {
-      const newItem = {
-        quantity: Number(data.newWeaponPurchase.quantity),
-        weaponCode: Number(data.newWeaponPurchase.weapon),
-        value: Number(data.newWeaponPurchase.value.substr(3).replace(",", ".")),
-      };
-
-      // if (weapon) {
-      //   //chamada pelo btn Adicionar ao Carrinho
-      //   const button = e.target;
-      //   const { code } = weapon;
-
-      //   let buttonText = button.children[0].textContent;
-
-      //   if (buttonText === "Adicionar ao") {
-      //     this.buttonRemoveToCart(button);
-      //     const newItem = {
-      //       quantity: 1,
-      //       weaponCode: code,
-      //       value: Number(weapon.price * 1),
-      //     };
-      //     this.cart.push(newItem);
-      //   } else {
-      //     this.buttonAddToCart(button);
-      //     this.cart.forEach((item, index) => {
-      //       if (item.weaponCode === code) {
-      //         this.cart.splice(index, 1);
-      //       }
-      //     });
-      //   }
-
-      e.preventDefault();
-      //Chamada pelo gravar do formulário
+    addToCart(weapon) {
+      const purchaseRequired = this.validation(
+        data.newWeaponPurchase.purchaseCode,
+        () => {
+          data.validations.purchaseRequired = true;
+          data.validations.purchaseRequiredMessage =
+            "Selecione uma compra para continuar.";
+        },
+        () => {
+          data.validations.purchaseRequired = false;
+        }
+      );
 
       const weaponRequired = this.validation(
         data.newWeaponPurchase.weapon,
         () => {
-          data.newWeaponPurchase.weaponRequired = true;
-          data.newWeaponPurchase.weaponRequiredMessage =
-            "Escolha uma arma para continuar.";
+          data.validations.weaponRequired = true;
+          data.validations.weaponRequiredMessage =
+            "Selecione uma arma para continuar.";
         },
-        () => (data.newWeaponPurchase.weaponRequired = false)
-      );
-
-      const quantityRequired = this.validation(
-        data.newWeaponPurchase.quantity,
         () => {
-          data.newWeaponPurchase.quantityRequired = true;
-          data.newWeaponPurchase.quantityRequiredMessage =
-            "Escolha a quantidade para continuar.";
-        },
-        () => (data.newWeaponPurchase.quantityRequired = false)
+          data.validations.weaponRequired = false;
+        }
       );
 
       const quantityMinValue = this.validation(
         data.newWeaponPurchase.quantity >= 1,
         () => {
-          data.newWeaponPurchase.quantityRequired = true;
-          data.newWeaponPurchase.quantityRequiredMessage =
-            "Escolha no mínimo 1 item para adicionar ao carrinho.";
+          data.validations.quantityRequired = true;
+          data.validations.quantityRequiredMessage =
+            "A quantidade mínima para compra é 1 unidade.";
         },
-        () => (data.newWeaponPurchase.quantityRequired = false)
+        () => {
+          data.validations.quantityRequired = false;
+        }
       );
 
-      if (weaponRequired && quantityRequired && quantityMinValue) {
-        let itemExists = false;
+      // validação de campos
+      if (purchaseRequired && weaponRequired && quantityMinValue) {
+        const label = document.getElementById("newWeaponPurchaseStatus");
 
-        data.cart.forEach((item) => {
-          if (item.weaponCode === data.newWeaponPurchase.weapon) {
-            itemExists = true;
-            data.newWeaponPurchase.weaponExistsMessage =
-              "Essa arma já está no carrinho.";
-            this.validation(
-              itemExists,
-              () => {
-                data.newWeaponPurchase.weaponExists = true;
-              },
-              () => (data.newWeaponPurchase.weaponExists = true)
-            );
-          }
-        });
+        const newWeaponPurchase = {
+          purchaseCode: data.newWeaponPurchase.purchaseCode,
+          weaponcode: data.newWeaponPurchase.weapon,
+          value: Number(
+            data.newWeaponPurchase.value.substr(3).replace(",", ".")
+          ),
+          quantity: Number(data.newWeaponPurchase.quantity),
+        };
 
-        if (!itemExists) {
-          this.cart.push(newItem);
+        data.validations.weaponPurchaseLoading = true;
 
-          // reajusta o estilo do botão
-          const weaponCode = weapon;
-          const weaponStoreItems = document.querySelectorAll("#appStore ul li");
+        //adicionar compra arma
+        if (true) {
+          axios
+            .post(
+              "http://localhost:4040/insertWeaponPurchase",
+              newWeaponPurchase
+            )
+            .then((response) => {
+              setTimeout(() => {
+                data.validations.weaponPurchaseLoading = false;
+                data.validations.weaponExistsMessage =
+                  "Nova arma adicionada com sucesso.";
+                data.validations.weaponExists = true;
+                label.classList.add("successful");
+                label.classList.remove("invalid");
+                // adiciona no vetor do vue
 
-          weaponStoreItems.forEach((itemLi) => {
-            const id = itemLi.getAttribute("id");
-            if (Number(id) === Number(weaponCode)) {
-              const button = itemLi.children[3].children[1];
-              this.buttonRemoveToCart(button);
-            }
-          });
+                data.cart.push(newWeaponPurchase);
 
-          // Limpar formulário
-          this.clearStateForm();
+                axios
+                  .post("http://localhost:4040/updatePurchasePrice", {
+                    value: priceCart(),
+                    code: data.newWeaponPurchase.purchaseCode,
+                  })
+                  .then((response) => {
+                    console.log("Preços Atualizados");
+                    data.user.purchases.forEach((purchase, index) => {
+                      if (
+                        purchase.code === data.newWeaponPurchase.purchaseCode
+                      ) {
+                        data.user.purchases[index].value = priceCart();
+                      }
+                    });
+                    this.resetNewWeaponPurchase();
+                  })
+                  .catch((error) => {
+                    console.log(error);
+                  });
+              }, 1000);
+              setTimeout(() => {
+                data.validations.weaponExists = false;
+              }, 4000);
+            })
+            .catch((error) => {
+              setTimeout(() => {
+                data.validations.weaponPurchaseLoading = false;
+                data.validations.weaponExistsMessage =
+                  "Erro ao adicionar nova arma.";
+                data.validations.weaponExists = true;
+                label.classList.add("invalid");
+                label.classList.remove("successful");
+              }, 1000);
+              setTimeout(() => {
+                data.validations.weaponExists = false;
+              }, 4000);
+            });
+        } else {
+          //editar compra arma
         }
       }
     },
@@ -159,7 +170,7 @@ const container = new Vue({
     addNewPurchase(e) {
       e.preventDefault();
 
-      //validations
+      // Validações -> Unicamente a Data
       const dateRequired = this.validation(
         data.newPurchase.date,
         () => {
@@ -171,8 +182,6 @@ const container = new Vue({
           data.validations.dateRequired = false;
         }
       );
-
-      console.log(dateRequired);
 
       if (dateRequired) {
         const label = document.getElementById("newPurchaseStatus");
@@ -318,6 +327,74 @@ const container = new Vue({
       }
     },
 
+    removeWeaponPurchaseButton(index) {
+      const label = document.getElementById("newWeaponPurchaseStatus");
+
+      const item = data.cart[index];
+      const req = {
+        code: item.purchasecode,
+        weapon: item.weaponcode,
+      };
+
+      data.validations.weaponPurchaseLoading = true;
+
+      axios
+        .post(`http://localhost:4040/deleteWeaponPurchase`, req)
+        .then((response) => {
+          setTimeout(() => {
+            data.validations.weaponPurchaseLoading = false;
+            data.validations.weaponExistsMessage =
+              "Compra excluída com sucesso.";
+            data.validations.weaponExists = true;
+            label.classList.add("successful");
+            label.classList.remove("invalid");
+
+            data.cart.splice(index, 1);
+            
+            axios
+            .post("http://localhost:4040/updatePurchasePrice", {
+              value: priceCart(),
+              code: data.newWeaponPurchase.purchaseCode,
+            })
+            .then((response) => {
+                console.log("Preços Atualizados");
+                data.user.purchases.forEach((purchase, index) => {
+                  if (purchase.code === data.newWeaponPurchase.purchaseCode) {
+                    data.user.purchases[index].value = priceCart();
+                  }
+                });
+                this.resetNewWeaponPurchase();
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+          }, 1000);
+
+          setTimeout(() => {
+            data.validations.weaponExists = false;
+          }, 4000);
+        })
+        .catch((error) => {
+          setTimeout(() => {
+            data.validations.weaponPurchaseLoading = false;
+            data.validations.weaponExistsMessage = "Erro ao excluir compra.";
+            data.validations.weaponExists = true;
+            label.classList.add("invalid");
+            label.classList.remove("successful");
+          }, 1000);
+
+          setTimeout(() => {
+            data.validations.weaponExists = false;
+          }, 4000);
+        });
+    },
+
+    goShop(code) {
+      this.currentSection = { store: false, cart: true, profile: false };
+      this.renderWeaponPurchase(code);
+      data.newWeaponPurchase.purchaseCode = code;
+    },
+
     resetNewPurchase(e) {
       if (e) {
         e.preventDefault();
@@ -328,8 +405,28 @@ const container = new Vue({
       data.newPurchase.value = "";
     },
 
-    renderWeaponPurchase(value) {
-      alert("value");
+    resetNewWeaponPurchase(e) {
+      if (e) {
+        e.preventDefault();
+      }
+
+      data.newWeaponPurchase.weapon = "";
+      data.newWeaponPurchase.value = "";
+      data.newWeaponPurchase.quantity = "";
+    },
+
+    renderWeaponPurchase(purchaseCode) {
+      data.cart = [];
+      axios
+        .get("http://localhost:4040/getWeaponPurchase")
+        .then((response) => response.data)
+        .then((respData) => {
+          respData.forEach((item) => {
+            if (item.purchasecode === purchaseCode) {
+              data.cart.push(item);
+            }
+          });
+        });
     },
 
     formatDate(date) {

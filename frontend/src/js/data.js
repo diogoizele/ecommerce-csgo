@@ -14,20 +14,21 @@ let data = {
     passwordRequired: false,
     passwordMessageInvalid: "",
 
-
+    purchaseRequired: false,
+    purchaseRequiredMessage: "",
     weaponRequired: false,
     weaponRequiredMessage: "",
     quantityRequired: false,
     quantityRequiredMessage: "",
     weaponExistsMessage: "",
     weaponExists: false,
-
+    weaponPurchaseLoading: false,
 
     dateRequired: false,
     dateRequiredMessage: "",
     purchaseStatus: false,
-    purchaseMessage: '',
-    purchaseLoading: false
+    purchaseMessage: "",
+    purchaseLoading: false,
   },
 
   user: {
@@ -37,8 +38,8 @@ let data = {
     weaponPurchase: [],
   },
 
-
   cart: [],
+  cartPrice: 0,
   weapons: [],
   weaponLoading: true,
 
@@ -71,5 +72,16 @@ function getPlayer() {
     }
   } else {
     return "";
+  }
+}
+
+function priceCart() {
+  if (data.cart.length) {
+    const prices = data.cart
+      .map((item) => Number(item.value))
+      .reduce((total, current) => total + current);
+    return prices;
+  } else {
+    return 0;
   }
 }
