@@ -229,6 +229,7 @@
               </div>
               <div class="form-group buttons">
                 <button type="button" @click="addToCart(null)">Gravar</button>
+                <button type="button" @click="editToCart()">Editar</button>
                 <button type="reset" @click="resetNewWeaponPurchase($event)">
                   Cancelar
                 </button>
@@ -258,9 +259,11 @@
                   <tr v-for="(item, index) in cart">
                     <td>{{weaponName(item.weaponcode)}}</td>
                     <td>{{item.quantity}}</td>
-                    <td>${{item.value}}</td>
                     <td>
-                      <button @click="editCartItem(item)">
+                      R$ {{Number(item.value).toFixed(2).replace(',','.')}}
+                    </td>
+                    <td>
+                      <button @click="editWeaponPurchaseButton(index)">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           height="24px"

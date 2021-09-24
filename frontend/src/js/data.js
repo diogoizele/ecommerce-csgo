@@ -50,6 +50,8 @@ let data = {
     value: "",
   },
 
+  newWeaponPurchaseIndex: null,
+
   newPurchase: {
     code: "",
     value: "",

@@ -188,6 +188,35 @@ app.post("/updatePurchase", (req, res, next) => {
   });
 });
 
+app.post("/updateWeaponPurchase", (req, res, next) => {
+  db.connect((err, client, done) => {
+    if (err) {
+      console.log("Não conseguiu acessar o Banco");
+      res.status(400).send(JSON.stringify(err));
+    } else {
+      const queryInsertPurchase = {
+        text: "UPDATE weapon_purchase SET quantity = $1, value = $2 where purchase_code = $3 AND weapon_code = $4",
+        values: [
+          req.body.quantity,
+          req.body.value,
+          req.body.code,
+          req.body.weapon,
+        ],
+      };
+
+      client.query(queryInsertPurchase, (err, result) => {
+        done();
+        if (err) {
+          console.log(err);
+          res.status(400).send(JSON.stringify(err));
+        } else {
+          res.status(200).send(result);
+        }
+      });
+    }
+  });
+});
+
 app.post("/updatePurchasePrice", (req, res, next) => {
   db.connect((err, client, done) => {
     if (err) {
@@ -211,7 +240,6 @@ app.post("/updatePurchasePrice", (req, res, next) => {
     }
   });
 });
-
 
 app.get("/deletePurchase/:code", (req, res, next) => {
   db.connect((err, client, done) => {
