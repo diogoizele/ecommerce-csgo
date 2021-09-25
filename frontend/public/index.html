@@ -130,7 +130,24 @@
             id="appStore"
             v-show="currentSection.store"
           >
-            <section>
+            <div class="form-group">
+              <label for="weaponPurchasePurchaseCode">Compra</label>
+              <select
+                id="weaponPurchasePurchaseCode"
+                @change="selectPurchase()"
+                v-model="newWeaponPurchase.purchaseCode"
+              >
+                <option value="">Escolha uma opção</option>
+                <option
+                  v-for="purchase in user.purchases"
+                  :value="purchase.code"
+                >
+                  {{purchase.code}} - {{formatDate(purchase.date)}}
+                </option>
+              </select>
+            </div>
+
+            <section v-if="currentSection.purchaseSelected">
               <h3>Armas</h3>
               <div class="form-group" v-if="this.weaponLoading">
                 <div class="form-loader"></div>
@@ -138,7 +155,7 @@
               <ul>
                 <li v-for="weapon in weapons" :id="weapon.code">
                   <img
-                    v-bind:src="setImageSrc(weapon.type_name)"
+                    v-bind:src="setImageSrc(weapon.type_code)"
                     alt="Foto do Tipo da Arma"
                   />
                   <p class="weapon-name">{{weapon.name}}</p>
@@ -146,7 +163,7 @@
 
                   <div>
                     <p>${{weapon.price}}</p>
-                    <button @click="addToCart(weapon,  $event)">
+                    <button @click="addItemByStore(weapon, $event)">
                       <span>Adicionar ao</span>
                       <svg viewBox="0 0 24 24">
                         <path d="M0 0h24v24H0V0z" fill="none" />
@@ -228,8 +245,16 @@
                 <input type="text" disabled v-model="newWeaponPurchase.value" />
               </div>
               <div class="form-group buttons">
-                <button type="button" @click="addToCart(null)">Gravar</button>
-                <button type="button" @click="editToCart()">Editar</button>
+                <button
+                  type="button"
+                  @click="addToCart(null)"
+                  v-if="buttons.add"
+                >
+                  Gravar
+                </button>
+                <button type="button" @click="editToCart()" v-if="buttons.edit">
+                  Editar
+                </button>
                 <button type="reset" @click="resetNewWeaponPurchase($event)">
                   Cancelar
                 </button>
@@ -299,6 +324,7 @@
               </table>
             </div>
           </section>
+
           <section
             class="app-section"
             id="appProfile"

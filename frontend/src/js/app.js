@@ -5,13 +5,19 @@ const container = new Vue({
     changeSection(section) {
       switch (section) {
         case 1:
-          this.currentSection = { store: true, cart: false, profile: false };
+          data.currentSection.store = true;
+          data.currentSection.cart = false;
+          data.currentSection.profile = false;
           break;
         case 2:
-          this.currentSection = { store: false, cart: true, profile: false };
+          data.currentSection.store = false;
+          data.currentSection.cart = true;
+          data.currentSection.profile = false;
           break;
         case 3:
-          this.currentSection = { store: false, cart: false, profile: true };
+          data.currentSection.store = false;
+          data.currentSection.cart = false;
+          data.currentSection.profile = true;
           break;
       }
     },
@@ -24,29 +30,40 @@ const container = new Vue({
           user: { nickname: null },
         })
       );
-      this.logged = false;
-      this.loading = false;
-      this.user.nickname = "";
-      this.user.password = "";
-      this.cart = [];
+      data.logged = false;
+      data.loading = false;
+      data.user.nickname = "";
+      data.user.password = "";
+      data.cart = [];
+      data.currentSection = {
+        store: true,
+        cart: false,
+        profile: false,
+        purchaseSelected: false,
+      };
+      data.newWeaponPurchaseIndex = null;
+      data.buttons = {
+        add: true,
+        edit: false,
+      };
     },
 
     setImageSrc(type) {
       let url = "/frontend/src/img/";
       switch (type) {
-        case "Pistola":
+        case 1:
           url += "pistol.png";
           break;
-        case "Escopeta":
+        case 2:
           url += "shotgun.png";
           break;
-        case "Sub-Metralhadora":
+        case 3:
           url += "submachine_gun.png";
           break;
-        case "Metralhadora":
+        case 5:
           url += "machine_gun.png";
           break;
-        case "Rifle":
+        case 4:
           url += "rifle.png";
           break;
       }
@@ -95,7 +112,7 @@ const container = new Vue({
         const label = document.getElementById("newWeaponPurchaseStatus");
 
         const newWeaponPurchase = {
-          purchaseCode: data.newWeaponPurchase.purchaseCode,
+          purchasecode: data.newWeaponPurchase.purchaseCode,
           weaponcode: data.newWeaponPurchase.weapon,
           value: Number(
             data.newWeaponPurchase.value.substr(3).replace(",", ".")
@@ -205,6 +222,9 @@ const container = new Vue({
               data.validations.weaponExists = true;
               label.classList.add("successful");
               label.classList.remove("invalid");
+
+              data.buttons.add = true;
+              data.buttons.edit = false;
 
               // edita localmente no array do vue
               data.cart[data.newWeaponPurchaseIndex] = {
@@ -411,10 +431,15 @@ const container = new Vue({
               data.validations.purchaseStatus = false;
             }, 4000);
           });
+      } else {
+        data.validations.purchaseLoading = false;
       }
     },
 
     editWeaponPurchaseButton(index) {
+      data.buttons.edit = true;
+      data.buttons.add = false;
+
       data.newWeaponPurchaseIndex = index;
       data.newWeaponPurchase.quantity = data.cart[index].quantity;
       data.newWeaponPurchase.purchaseCode = data.cart[index].purchasecode;
@@ -435,7 +460,7 @@ const container = new Vue({
       data.validations.weaponPurchaseLoading = true;
 
       if (wannaRemove) {
-        axios
+        axios 
           .post(`http://localhost:4040/deleteWeaponPurchase`, req)
           .then((response) => {
             setTimeout(() => {
@@ -484,6 +509,8 @@ const container = new Vue({
               data.validations.weaponExists = false;
             }, 4000);
           });
+      } else {
+        data.validations.weaponPurchaseLoading = false;
       }
     },
 
@@ -511,6 +538,9 @@ const container = new Vue({
       data.newWeaponPurchase.weapon = "";
       data.newWeaponPurchase.value = "";
       data.newWeaponPurchase.quantity = "";
+
+      data.buttons.add = true;
+      data.buttons.edit = false;
     },
 
     renderWeaponPurchase(purchaseCode) {
@@ -525,6 +555,32 @@ const container = new Vue({
               data.cart.push(item);
             }
           });
+
+          if (!data.newWeaponPurchase.purchaseCode) {
+            data.currentSection.purchaseSelected = false;
+          } else {
+            data.currentSection.purchaseSelected = true;
+
+            const weapons = [];
+            const lis = document.querySelectorAll("#appStore ul li");
+            data.cart.forEach((item) => {
+              weapons.push(item.weaponcode);
+            });
+
+            lis.forEach((li) => {
+              const id = Number(li.getAttribute("id"));
+              if (weapons.includes(id)) {
+                // se existe item já no carrinho
+                const button = li.children[3].children[1];
+                button.children[0].textContent = "Remover do";
+                button.style.backgroundColor = "#EE3E54";
+              } else {
+                const button = li.children[3].children[1];
+                button.children[0].textContent = "Adicionar ao";
+                button.style.backgroundColor = "#195E93";
+              }
+            });
+          }
         });
     },
 
@@ -625,6 +681,66 @@ const container = new Vue({
           this.cart.splice(index, 1);
         }
       });
+    },
+
+    selectPurchase() {
+      const code = data.newWeaponPurchase.purchaseCode;
+      if (code) {
+        data.currentSection.purchaseSelected = true;
+        this.renderWeaponPurchase(code);
+      } else {
+        data.currentSection.purchaseSelected = false;
+        data.cart = [];
+      }
+    },
+
+    addItemByStore(weapon, e) {
+      const button = e.target;
+      const buttonText = button.children[0].textContent;
+
+      const newWeaponPurchase = {
+        purchasecode: Number(data.newWeaponPurchase.purchaseCode),
+        weaponcode: weapon.code,
+        quantity: 1,
+        value: Number(weapon.price),
+      };
+
+      console.log(newWeaponPurchase);
+
+      if (buttonText === "Adicionar ao") {
+        axios
+          .post("http://localhost:4040/insertWeaponPurchase", newWeaponPurchase)
+          .then((response) => {
+            data.cart.push(newWeaponPurchase);
+            axios
+              .post("http://localhost:4040/updatePurchasePrice", {
+                value: priceCart(),
+                code: data.newWeaponPurchase.purchaseCode,
+              })
+              .then((response) => {
+                console.log("Preços Atualizados");
+                data.user.purchases.forEach((purchase, index) => {
+                  if (purchase.code === data.newWeaponPurchase.purchaseCode) {
+                    data.user.purchases[index].value = priceCart();
+                  }
+                });
+              })
+              .catch((error) => {
+                console.log(error);
+              });
+
+              button.children[0].textContent = "Remover do";
+              button.style.backgroundColor = "#EE3E54";
+
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      } else {
+        console.log("remove");
+        button.children[0].textContent = "Adicionar ao";
+        button.style.backgroundColor = "#195E93";
+      }
     },
   },
 

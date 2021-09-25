@@ -120,7 +120,7 @@ app.post("/insertWeaponPurchase", (req, res, next) => {
       const queryInsertWeaponPurchase = {
         text: "INSERT INTO weapon_purchase (purchase_code, weapon_code, value, quantity) values ($1,$2,$3,$4)",
         values: [
-          req.body.purchaseCode,
+          req.body.purchasecode,
           req.body.weaponcode,
           req.body.value,
           req.body.quantity,

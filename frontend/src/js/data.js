@@ -6,6 +6,7 @@ let data = {
     store: true,
     cart: false,
     profile: false,
+    purchaseSelected: false
   },
 
   validations: {
@@ -56,6 +57,11 @@ let data = {
     code: "",
     value: "",
     date: "",
+  },
+
+  buttons: {
+    add: true,
+    edit: false,
   },
 };
 
