@@ -70,7 +70,7 @@ const container = new Vue({
       return url;
     },
 
-    addToCart(weapon) {
+    addToCart() {
       const purchaseRequired = this.validation(
         data.newWeaponPurchase.purchaseCode,
         () => {
@@ -136,23 +136,7 @@ const container = new Vue({
 
               data.cart.push(newWeaponPurchase);
 
-              axios
-                .post("http://localhost:4040/updatePurchasePrice", {
-                  value: priceCart(),
-                  code: data.newWeaponPurchase.purchaseCode,
-                })
-                .then((response) => {
-                  console.log("Preços Atualizados");
-                  data.user.purchases.forEach((purchase, index) => {
-                    if (purchase.code === data.newWeaponPurchase.purchaseCode) {
-                      data.user.purchases[index].value = priceCart();
-                    }
-                  });
-                  this.resetNewWeaponPurchase();
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
+              this.updatePrices();
             }, 1000);
             setTimeout(() => {
               data.validations.weaponExists = false;
@@ -172,6 +156,26 @@ const container = new Vue({
             }, 4000);
           });
       }
+    },
+
+    updatePrices() {
+      axios
+        .post("http://localhost:4040/updatePurchasePrice", {
+          value: priceCart(),
+          code: data.newWeaponPurchase.purchaseCode,
+        })
+        .then((response) => {
+          console.log("Preços Atualizados");
+          data.user.purchases.forEach((purchase, index) => {
+            if (purchase.code === data.newWeaponPurchase.purchaseCode) {
+              data.user.purchases[index].value = priceCart();
+            }
+          });
+          this.resetNewWeaponPurchase();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
 
     editToCart() {
@@ -235,23 +239,7 @@ const container = new Vue({
                   data.newWeaponPurchase.value.substr(3).replace(",", ".")
                 ),
               };
-              axios
-                .post("http://localhost:4040/updatePurchasePrice", {
-                  value: priceCart(),
-                  code: data.newWeaponPurchase.purchaseCode,
-                })
-                .then((response) => {
-                  console.log("Preços Atualizados");
-                  data.user.purchases.forEach((purchase, index) => {
-                    if (purchase.code === data.newWeaponPurchase.purchaseCode) {
-                      data.user.purchases[index].value = priceCart();
-                    }
-                  });
-                  this.resetNewWeaponPurchase();
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
+              this.updatePrices();
             }, 1000);
 
             setTimeout(() => {
@@ -460,7 +448,7 @@ const container = new Vue({
       data.validations.weaponPurchaseLoading = true;
 
       if (wannaRemove) {
-        axios 
+        axios
           .post(`http://localhost:4040/deleteWeaponPurchase`, req)
           .then((response) => {
             setTimeout(() => {
@@ -473,23 +461,29 @@ const container = new Vue({
 
               data.cart.splice(index, 1);
 
-              axios
-                .post("http://localhost:4040/updatePurchasePrice", {
-                  value: priceCart(),
-                  code: data.newWeaponPurchase.purchaseCode,
-                })
-                .then((response) => {
-                  console.log("Preços Atualizados");
-                  data.user.purchases.forEach((purchase, index) => {
-                    if (purchase.code === data.newWeaponPurchase.purchaseCode) {
-                      data.user.purchases[index].value = priceCart();
-                    }
-                  });
-                  this.resetNewWeaponPurchase();
-                })
-                .catch((error) => {
-                  console.log(error);
-                });
+              this.updatePrices();
+
+              data.currentSection.purchaseSelected = true;
+
+              const weapons = [];
+              const lis = document.querySelectorAll("#appStore ul li");
+              data.cart.forEach((item) => {
+                weapons.push(item.weaponcode);
+              });
+
+              lis.forEach((li) => {
+                const id = Number(li.getAttribute("id"));
+                if (weapons.includes(id)) {
+                  // se existe item já no carrinho
+                  const button = li.children[3].children[1];
+                  button.children[0].textContent = "Remover do";
+                  button.style.backgroundColor = "#EE3E54";
+                } else {
+                  const button = li.children[3].children[1];
+                  button.children[0].textContent = "Adicionar ao";
+                  button.style.backgroundColor = "#195E93";
+                }
+              });
             }, 1000);
 
             setTimeout(() => {
@@ -560,12 +554,13 @@ const container = new Vue({
             data.currentSection.purchaseSelected = false;
           } else {
             data.currentSection.purchaseSelected = true;
-
-            const weapons = [];
             const lis = document.querySelectorAll("#appStore ul li");
+            const weapons = [];
             data.cart.forEach((item) => {
               weapons.push(item.weaponcode);
             });
+
+            console.log(lis);
 
             lis.forEach((li) => {
               const id = Number(li.getAttribute("id"));
@@ -705,8 +700,6 @@ const container = new Vue({
         value: Number(weapon.price),
       };
 
-      console.log(newWeaponPurchase);
-
       if (buttonText === "Adicionar ao") {
         axios
           .post("http://localhost:4040/insertWeaponPurchase", newWeaponPurchase)
@@ -718,7 +711,6 @@ const container = new Vue({
                 code: data.newWeaponPurchase.purchaseCode,
               })
               .then((response) => {
-                console.log("Preços Atualizados");
                 data.user.purchases.forEach((purchase, index) => {
                   if (purchase.code === data.newWeaponPurchase.purchaseCode) {
                     data.user.purchases[index].value = priceCart();
@@ -728,18 +720,59 @@ const container = new Vue({
               .catch((error) => {
                 console.log(error);
               });
-
-              button.children[0].textContent = "Remover do";
-              button.style.backgroundColor = "#EE3E54";
-
+            button.children[0].textContent = "Remover do";
+            button.style.backgroundColor = "#EE3E54";
           })
           .catch((error) => {
             console.log(error);
           });
       } else {
-        console.log("remove");
-        button.children[0].textContent = "Adicionar ao";
-        button.style.backgroundColor = "#195E93";
+        const weaponCode =
+          button.parentElement.parentElement.getAttribute("id");
+
+        const req = {
+          code: Number(data.newWeaponPurchase.purchaseCode),
+          weapon: weaponCode,
+        };
+
+        const wannaRemove = confirm("Deseja mesmo remover?");
+
+        if (wannaRemove) {
+          axios
+            .post(`http://localhost:4040/deleteWeaponPurchase`, req)
+            .then((response) => {
+              data.cart.forEach((item, index) => {
+                if (Number(item.weaponcode) === Number(weaponCode)) {
+                  data.cart.splice(index, 1);
+                }
+              });
+
+              button.children[0].textContent = "Adicionar ao";
+              button.style.backgroundColor = "#195E93";
+
+              axios
+                .post("http://localhost:4040/updatePurchasePrice", {
+                  value: priceCart(),
+                  code: data.newWeaponPurchase.purchaseCode,
+                })
+                .then((response) => {
+                  data.user.purchases.forEach((purchase, index) => {
+                    if (purchase.code === data.newWeaponPurchase.purchaseCode) {
+                      data.user.purchases[index].value = priceCart();
+                    }
+                  });
+                  this.resetNewWeaponPurchase();
+                })
+                .catch((error) => {
+                  console.log(error);
+                });
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        } else {
+          data.validations.weaponPurchaseLoading = false;
+        }
       }
     },
   },
